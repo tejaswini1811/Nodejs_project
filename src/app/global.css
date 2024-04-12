@@ -1,0 +1,120 @@
+body {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+/* For both horizontal and vertical scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  /* Width of the vertical scrollbar */
+  height: 8px;
+  /* Height of the horizontal scrollbar */
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+  /* Color when hovering over the scrollbar */
+}
+
+/* Handle on scrollbar */
+::-webkit-scrollbar-thumb {
+  background: #888;
+  /* Color of the scrollbar handle */
+  border-radius: 4px;
+  /* Rounded corners for the scrollbar handle */
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  /* Color of the scrollbar track */
+}
+
+/* Corner */
+::-webkit-scrollbar-corner {
+  background: #f1f1f1;
+  /* Color of the scrollbar corner */
+}
+
+/* Handle on drag */
+::-webkit-scrollbar-thumb:active {
+  background: #555;
+  /* Color when actively dragging the scrollbar handle */
+}
+
+
+body h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+label,
+a,
+strong,
+sub,
+sup,
+textarea,
+select,
+textarea {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+.otp-style {
+  justify-content: space-evenly !important;
+}
+
+.otp-style input {
+  margin: 0 !important;
+}
+
+.phone-text .MuiInputBase-root {
+  height: 44px;
+  border-radius: 50px;
+}
+
+.bullitin-filter .MuiPaper-root.MuiPaper-elevation {
+  top: 162px !important;
+}
+
+.buylead-filter .MuiPaper-root.MuiPaper-elevation {
+  top: 180px !important;
+}
+
+body {
+  padding-right: 0px !important;
+  width: 100% !important;
+}
+
+.align-inpt>div {
+  justify-content: center;
+}
+
+.buisnessmy .MuiFormControl-root.MuiTextField-root {
+  width: 46%;
+}
+
+
+span.MuiStepLabel-root.test {
+  align-items: center;
+  margin-top: -16px;
+}
+
+span.MuiStepLabel-root.test svg {
+  width: 58px;
+  height: 58px;
+  padding: 14px;
+  background: #2b305c;
+  color: #fff;
+  z-index: 111;
+  border-radius: 32px;
+  box-shadow: inset 0px 0px 10px 0px #FFF;
+}
+
+span.MuiStepLabel-root.test span.MuiStepLabel-label {
+  margin-top: 10px;
+  color: #000;
+  font-size: 14px;
+  font-weight: 600;
+}
