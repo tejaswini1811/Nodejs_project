@@ -19,10 +19,12 @@ pipeline {
         }
         stage('Build and Push Docker Image') {
             steps {
-                def dockerImage = docker.build("project_nodejs:${BUILD_NUMBER}")
-                sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
-                dockerImage.tag "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO_NAME}:latest"
-                dockerImage.push("${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO_NAME}:latest")
+                script {
+                    def dockerImage = docker.build("project_nodejs:${BUILD_NUMBER}")
+                    sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+                    dockerImage.tag "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO_NAME}:latest"
+                    dockerImage.push("${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO_NAME}:latest")
+                }
             }
         }
         stage('Create ECS Cluster') {
@@ -32,27 +34,29 @@ pipeline {
         }
         stage('Register Task Definition') {
             steps {
-                writeFile file: 'task-definition.json', text: """
-                {
-                    "family": "${ECS_TASK_FAMILY}",
-                    "containerDefinitions": [
-                        {
-                            "name": "your-container-name",
-                            "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO_NAME}:latest",
-                            "cpu": 256,
-                            "memory": 512,
-                            "essential": true,
-                            "portMappings": [
-                                {
-                                    "containerPort": 3000,
-                                    "hostPort": 3000
-                                }
-                            ]
-                        }
-                    ]
+                script {
+                    writeFile file: 'task-definition.json', text: """
+                    {
+                        "family": "${ECS_TASK_FAMILY}",
+                        "containerDefinitions": [
+                            {
+                                "name": "your-container-name",
+                                "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO_NAME}:latest",
+                                "cpu": 256,
+                                "memory": 512,
+                                "essential": true,
+                                "portMappings": [
+                                    {
+                                        "containerPort": 3000,
+                                        "hostPort": 3000
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                    """
+                    sh "aws ecs register-task-definition --cli-input-json file://task-definition.json --region ${AWS_DEFAULT_REGION}"
                 }
-                """
-                sh "aws ecs register-task-definition --cli-input-json file://task-definition.json --region ${AWS_DEFAULT_REGION}"
             }
         }
         stage('Run Task in ECS') {
