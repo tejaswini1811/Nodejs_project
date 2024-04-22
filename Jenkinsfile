@@ -38,7 +38,7 @@ pipeline {
                     writeFile file: 'task-definition.json', text: """
                     {
                         "family": "${ECS_TASK_FAMILY}",
-                        "containerDefinitions": [
+                         "containerDefinitions": [
                             {
                                 "name": "nodejs",
                                 "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO_NAME}:${BUILD_NUMBER}",
@@ -61,7 +61,7 @@ pipeline {
         }
         stage('Run Task in ECS') {
             steps {
-                sh "aws ecs run-task --cluster ${ECS_CLUSTER_NAME} --task-definition ${ECS_TASK_FAMILY} --region ${AWS_DEFAULT_REGION} --launch-type FARGATE --count 2"
+                sh "aws ecs run-task --cluster ${ECS_CLUSTER_NAME} --task-definition ${ECS_TASK_FAMILY} --region ${AWS_DEFAULT_REGION} --launch-type EC2 --count 2"
             }
         }
     }
