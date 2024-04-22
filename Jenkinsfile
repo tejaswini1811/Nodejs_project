@@ -61,7 +61,7 @@ pipeline {
         }
         stage('Run Task in ECS') {
             steps {
-                sh "aws ecs run-task --cluster ${ECS_CLUSTER_NAME} --task-definition ${ECS_TASK_FAMILY} --region ${AWS_DEFAULT_REGION} --launch-type EC2 --count 2"
+                sh "aws ecs run-task --cluster ${ECS_CLUSTER_NAME} --task-definition ${ECS_TASK_FAMILY} --region ${AWS_DEFAULT_REGION} --launch-type FARGATE --count 2"
             }
         }
     }
