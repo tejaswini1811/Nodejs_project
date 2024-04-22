@@ -41,7 +41,7 @@ pipeline {
                         "containerDefinitions": [
                             {
                                 "name": "nodejs",
-                                "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO_NAME}:latest",
+                                "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO_NAME}:${BUILD_NUMBER}",
                                 "cpu": 256,
                                 "memory": 512,
                                 "essential": true,
