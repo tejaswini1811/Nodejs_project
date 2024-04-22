@@ -22,8 +22,8 @@ pipeline {
                 script {
                     def dockerImage = docker.build("${ECR_REPO_NAME}:${BUILD_NUMBER}")
                     sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
-                    dockerImage.tag("348722393091.dkr.ecr.us-west-2.amazonaws.com/${ECR_REPO_NAME}:${BUILD_NUMBER}")
-                    dockerImage.push("348722393091.dkr.ecr.us-west-2.amazonaws.com/${ECR_REPO_NAME}:${BUILD_NUMBER}")
+                    sh "docker tag ${ECR_REPO_NAME}:${BUILD_NUMBER} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO_NAME}:${BUILD_NUMBER}"
+                    sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO_NAME}:${BUILD_NUMBER}"
                 }
             }
         }
