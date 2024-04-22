@@ -40,7 +40,7 @@ pipeline {
                         "family": "${ECS_TASK_FAMILY}",
                         "containerDefinitions": [
                             {
-                                "name": "your-container-name",
+                                "name": "nodejs",
                                 "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO_NAME}:latest",
                                 "cpu": 256,
                                 "memory": 512,
@@ -61,7 +61,7 @@ pipeline {
         }
         stage('Run Task in ECS') {
             steps {
-                sh "aws ecs run-task --cluster ${ECS_CLUSTER_NAME} --task-definition ${ECS_TASK_FAMILY} --region ${AWS_DEFAULT_REGION}"
+                sh "aws ecs run-task --cluster ${ECS_CLUSTER_NAME} --task-definition ${ECS_TASK_FAMILY} --region ${AWS_DEFAULT_REGION} --launch-type EC2 --count 2"
             }
         }
     }
