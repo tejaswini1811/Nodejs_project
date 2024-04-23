@@ -1,23 +1,48 @@
 {
-    "family": "${TASK_DEFINITION_NAME}",
+    "family": "nodejs_task",
     "containerDefinitions": [
         {
-            "image": "348722393091.dkr.ecr.us-west-2.amazonaws.com/nodejs_project:${env.BUILD_ID}",
             "name": "nodejs_container",
-	        "essential": true,
+            "image": "348722393091.dkr.ecr.us-west-2.amazonaws.com/nodejs_project",
+            "cpu": 0,
             "portMappings": [
                 {
+                    "name": "nodejs_port",
                     "containerPort": 3000,
-                    "hostPort": 3000
+                    "hostPort": 3000,
+                    "protocol": "tcp",
+                    "appProtocol": "http"
                 }
-            ]
+            ],
+            "essential": true,
+            "environment": [],
+            "environmentFiles": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "ulimits": [],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-create-group": "true",
+                    "awslogs-group": "/ecs/nodejs_task",
+                    "awslogs-region": "us-west-2",
+                    "awslogs-stream-prefix": "ecs"
+                },
+                "secretOptions": []
+            },
+            "systemControls": []
         }
     ],
-    "cpu": "256",
-    "memory": "512",
-    "requiresCompatibilities": [
-             "FARGATE"
-    ],
+    "taskRoleArn": "arn:aws:iam::348722393091:role/ecsTaskExecutionRole",
+    "executionRoleArn": "arn:aws:iam::348722393091:role/ecsTaskExecutionRole",
     "networkMode": "awsvpc",
-    "executionRoleArn": "arn:aws:iam::348722393091:role/ECS_ECR"
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "1024",
+    "memory": "3072",
+    "runtimePlatform": {
+        "cpuArchitecture": "X86_64",
+        "operatingSystemFamily": "LINUX"
+    }
 }
