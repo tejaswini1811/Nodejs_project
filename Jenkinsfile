@@ -19,50 +19,56 @@ pipeline {
 }
    
     stages {
-
-    // Building Docker image
-    stage('Building image') {
-      steps{
-        script {
-          dockerImage = docker.build "${IMAGE_REPO_NAME}:${IMAGE_TAG}"
-        }
-      }
-     }
-    // Run container locally and perform tests
-    stage('Running tests') {
-      steps{
-        sh "docker run -i --rm --name ${TEST_CONTAINER_NAME} ${IMAGE_REPO_NAME}:${IMAGE_TAG} npm test -- --watchAll=false"
-      }
-    }
-
-    // Uploading Docker image into AWS ECR
-    stage('Releasing') {
-     steps{  
-         script {
-			docker.withRegistry("https://" + REPOSITORY_URI, "ecr:${AWS_DEFAULT_REGION}:" + registryCredential) {
-                    	dockerImage.push()
+        stage('checkout') {
+            steps {
+                git url: 'https://github.com/tejaswini1811/Nodejs_project.git',
+                    branch: 'test'
             }
-         }
-       }
-     }
+        }
 
-    // Update task definition and service running in ECS cluster to deploy
-    stage('Deploy') {
-     steps{
-            withAWS(credentials: registryCredential, region: "${AWS_DEFAULT_REGION}") {
+        // Building Docker image
+        stage('Building image') {
+            steps{
                 script {
-			sh "chmod +x -R ${env.WORKSPACE}"
-			sh './script.sh'
+                    dockerImage = docker.build "${IMAGE_REPO_NAME}:${IMAGE_TAG}"
                 }
-            } 
-         }
-       }
-     }
-   // Clear local image registry. Note that all the data that was used to build the image is being cleared.
-   // For different use cases, one may not want to clear all this data so it doesn't have to be pulled again for each build.
-   post {
-       always {
-       sh 'docker system prune -a -f'
-     }
-   }
+            }
+        }
+        // Run container locally and perform tests
+        stage('Running tests') {
+            steps{
+                sh "docker run -i --rm --name ${TEST_CONTAINER_NAME} ${IMAGE_REPO_NAME}:${IMAGE_TAG} npm test -- --watchAll=false"
+            }
+        }
+
+        // Uploading Docker image into AWS ECR
+        stage('Releasing') {
+            steps{  
+                script {
+                    docker.withRegistry("https://" + REPOSITORY_URI, "ecr:${AWS_DEFAULT_REGION}:" + registryCredential) {
+                                dockerImage.push()
+                    }
+                }
+            }
+        }
+
+        // Update task definition and service running in ECS cluster to deploy
+        stage('Deploy') {
+            steps{
+                    withAWS(credentials: registryCredential, region: "${AWS_DEFAULT_REGION}") {
+                        script {
+                    sh "chmod +x -R ${env.WORKSPACE}"
+                    sh './script.sh'
+                        }
+                    } 
+                }
+        }
+        }
+        // Clear local image registry. Note that all the data that was used to build the image is being cleared.
+        // For different use cases, one may not want to clear all this data so it doesn't have to be pulled again for each build.
+        post {
+            always {
+                sh 'docker system prune -a -f'
+            }
+        }
  }
