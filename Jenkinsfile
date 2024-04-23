@@ -12,8 +12,8 @@ pipeline {
         //Do not edit REPOSITORY_URI.
         REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
 	    registryCredential = "aws"
-        SUBNETS = ["subnet-0581fca58af676215","subnet-0fdb63e26e3f22cf1"]
-        SECURITYGROUPS = ["sg-0e2de29ec3748f13b"]
+        SUBNETS = "[subnet-0581fca58af676215,subnet-0fdb63e26e3f22cf1]"
+        SECURITYGROUPS = "[sg-0e2de29ec3748f13b]"
     
     }
    
