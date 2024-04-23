@@ -1,8 +1,8 @@
 {
-    "family": "${ECS_TASK_FAMILY}",
+    "family": "${TASK_DEFINITION_NAME}",
     "containerDefinitions": [
         {
-            "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO_NAME}:${BUILD_NUMBER}",
+            "image": "348722393091.dkr.ecr.us-west-2.amazonaws.com/nodejs_project:${env.BUILD_ID}",
             "name": "nodejs_container",
 	        "essential": true,
             "portMappings": [
