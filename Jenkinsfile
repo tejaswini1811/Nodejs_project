@@ -111,6 +111,7 @@ pipeline {
                 sh "aws ecs run-task --cluster ${CLUSTER_NAME} --task-definition ${TASK_DEFINITION_NAME} --region ${AWS_DEFAULT_REGION} --launch-type FARGATE --count ${DESIRED_COUNT} --network-configuration awsvpcConfiguration={subnets=[subnet-0581fca58af676215,subnet-0fdb63e26e3f22cf1],securityGroups=[sg-0e2de29ec3748f13b],assignPublicIp=ENABLED} "
             }
         }
+    }
         // Clear local image registry. Note that all the data that was used to build the image is being cleared.
         // For different use cases, one may not want to clear all this data so it doesn't have to be pulled again for each build.
    post {
