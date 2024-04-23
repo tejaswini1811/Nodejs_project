@@ -1,0 +1,23 @@
+{
+    "family": "${ECS_TASK_FAMILY}",
+    "containerDefinitions": [
+        {
+            "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO_NAME}:${BUILD_NUMBER}",
+            "name": "nodejs_container",
+	        "essential": true,
+            "portMappings": [
+                {
+                    "containerPort": 3000,
+                    "hostPort": 3000
+                }
+            ]
+        }
+    ],
+    "cpu": "256",
+    "memory": "512",
+    "requiresCompatibilities": [
+             "FARGATE"
+    ],
+    "networkMode": "awsvpc",
+    "executionRoleArn": "arn:aws:iam::348722393091:role/ECS_ECR"
+}
