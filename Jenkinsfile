@@ -114,55 +114,53 @@ pipeline {
         stage('Create Load Balancer') {
             steps {
                 script {
-                        // Creating an Application Load Balancer
-                        def lb = sh(script: """
-                            aws elbv2 create-load-balancer \
-                                --name Nodejs-lb \
-                                --subnets subnet-0581fca58af676215 subnet-0fdb63e26e3f22cf1 subnet-09df83249a0362f2b subnet-0bd377746696148ae" \
-                                --security-groups ${SECURITYGROUPS} \
-                                --type network \
-                                --ip-address-type ipv4 \
-                                --scheme internet-facing \
-                                --region ${AWS_DEFAULT_REGION}
-                            """, returnStdout: true).trim()
-                        def lbArn = readJSON(text: lb).LoadBalancers[0].LoadBalancerArn
+                    // Creating an Application Load Balancer
+                    def lb = sh(script: """
+                        aws elbv2 create-load-balancer \
+                            --name Nodejs-lb \
+                            --subnets subnet-0581fca58af676215 subnet-0fdb63e26e3f22cf1 subnet-09df83249a0362f2b subnet-0bd377746696148ae \
+                            --security-groups ${SECURITYGROUPS} \
+                            --type network \
+                            --ip-address-type ipv4 \
+                            --scheme internet-facing \
+                            --region ${AWS_DEFAULT_REGION}
+                        """, returnStdout: true).trim()
+                    def lbArn = readJSON(text: lb).LoadBalancers[0].LoadBalancerArn
                 }
             } 
         }
         stage('Create targetgroup') {
             steps {
                 script {
-
-                        // Creating a target group
-                        def tg = sh(script: """
-                            aws elbv2 create-target-group \
-                                --name ecs-tg \
-                                --protocol TCP \
-                                --port 3000 \
-                                --vpc-id ${VPC_ID} \
-                                --health-check-protocol HTTP \
-                                --health-check-path / \
-                                --target-type instance \
-                                --ip-address-type ipv4 \
-                                --region ${AWS_DEFAULT_REGION}
-                            """, returnStdout: true).trim()
-                        def tgArn = readJSON(text: tg).TargetGroups[0].TargetGroupArn
+                    // Creating a target group
+                    def tg = sh(script: """
+                        aws elbv2 create-target-group \
+                            --name ecs-tg \
+                            --protocol TCP \
+                            --port 3000 \
+                            --vpc-id ${VPC_ID} \
+                            --health-check-protocol HTTP \
+                            --health-check-path / \
+                            --target-type instance \
+                            --ip-address-type ipv4 \
+                            --region ${AWS_DEFAULT_REGION}
+                        """, returnStdout: true).trim()
+                    def tgArn = readJSON(text: tg).TargetGroups[0].TargetGroupArn
                 }
             }
         }
         stage('Create listener') {
             steps {
                 script {
-
-                        // Creating a listener
-                        sh """
-                            aws elbv2 create-listener \
-                                --load-balancer-arn ${lbArn} \
-                                --protocol TCP \
-                                --port 3000 \
-                                --default-actions Type=forward,TargetGroupArn=${tgArn}
-                                --region ${AWS_DEFAULT_REGION}
-                            """
+                    // Creating a listener
+                    sh """
+                        aws elbv2 create-listener \
+                            --load-balancer-arn ${lbArn} \
+                            --protocol TCP \
+                            --port 3000 \
+                            --default-actions Type=forward,TargetGroupArn=${tgArn} \
+                            --region ${AWS_DEFAULT_REGION}
+                    """
                 }
             }
         }
