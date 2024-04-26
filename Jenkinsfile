@@ -129,7 +129,7 @@ pipeline {
                 }
             } 
         }
-        stage('Create Load Balancer') {
+        stage('Create targetgroup') {
             steps {
                 script {
 
@@ -150,7 +150,7 @@ pipeline {
                 }
             }
         }
-        stage('Create Load Balancer') {
+        stage('Create listener') {
             steps {
                 script {
 
