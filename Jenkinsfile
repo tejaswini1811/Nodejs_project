@@ -166,12 +166,7 @@ pipeline {
                 script {
                     // Creating a listener
                     sh """
-                        aws elbv2 create-listener \
-                            --load-balancer-arn ${lbArn} \
-                            --protocol TCP \
-                            --port 3000 \
-                            --default-actions Type=forward,TargetGroupArn=${tgArn} \
-                            --region ${AWS_DEFAULT_REGION}
+                        aws elbv2 create-listener --load-balancer-arn ${lbArn} --protocol TCP --port 3000 --default-actions Type=forward,TargetGroupArn=${tgArn} --region ${AWS_DEFAULT_REGION}
                     """
                 }
             }
