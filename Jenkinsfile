@@ -118,7 +118,7 @@ pipeline {
                         def lb = sh(script: """
                             aws elbv2 create-load-balancer \
                                 --name Nodejs-lb \
-                                --subnets ${SUBNETS} \
+                                --subnets "subnet-0581fca58af676215","subnet-0fdb63e26e3f22cf1" \
                                 --security-groups ${SECURITYGROUPS} \
                                 --type network \
                                 --ip-address-type ipv4 \
