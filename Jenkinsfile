@@ -127,7 +127,8 @@ pipeline {
                     """, returnStdout: true).trim()
 
                     // Extract ARN from output
-                    def lbArn = lbOutput =~ /"LoadBalancerArn": "(.*?)"/
+                    def lbArnMatcher = lbOutput =~ /"LoadBalancerArn": "(.*?)"/
+                    def lbArn = lbArnMatcher ? lbArnMatcher[0][1] : null
                     
                     // Print the ARN for verification
                     println "Load Balancer ARN: ${lbArn}"
@@ -152,7 +153,8 @@ pipeline {
                     """, returnStdout: true).trim()
 
                     // Extract ARN from output
-                    def tgArn = tgOutput =~ /"TargetGroupArn": "(.*?)"/
+                    def tgArnMatcher = tgOutput =~ /"TargetGroupArn": "(.*?)"/
+                    def tgArn = tgArnMatcher ? tgArnMatcher[0][1] : null
 
                     // Print the ARN for verification
                     println "Target Group ARN: ${tgArn}"
