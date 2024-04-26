@@ -132,12 +132,7 @@ pipeline {
                     
                     // Print the ARN for verification
                     println "Load Balancer ARN: ${lbArn}"
-                }
-            } 
-        }
-        stage('Create targetgroup') {
-            steps {
-                script {
+  
                     // Creating a target group
                     def tgOutput = sh(script: """
                         aws elbv2 create-target-group \
@@ -158,12 +153,7 @@ pipeline {
 
                     // Print the ARN for verification
                     println "Target Group ARN: ${tgArn}"
-                }
-            }
-        }
-        stage('Create listener') {
-            steps {
-                script {
+
                     // Creating a listener
                     sh """
                         aws elbv2 create-listener --load-balancer-arn ${lbArn} --protocol TCP --port 3000 --default-actions Type=forward,TargetGroupArn=${tgArn} --region ${AWS_DEFAULT_REGION}
