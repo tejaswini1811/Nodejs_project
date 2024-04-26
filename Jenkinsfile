@@ -122,7 +122,8 @@ pipeline {
                                 --security-groups ${SECURITYGROUPS} \
                                 --type network \
                                 --ip-address-type ipv4 \
-                                --scheme internet-facing
+                                --scheme internet-facing \
+                                --region ${AWS_DEFAULT_REGION}
                             """, returnStdout: true).trim()
                         def lbArn = readJSON(text: lb).LoadBalancers[0].LoadBalancerArn
 
@@ -136,7 +137,8 @@ pipeline {
                                 --health-check-protocol HTTP \
                                 --health-check-path / \
                                 --target-type instance \
-                                --ip-address-type ipv4
+                                --ip-address-type ipv4 \
+                                --region ${AWS_DEFAULT_REGION}
                             """, returnStdout: true).trim()
                         def tgArn = readJSON(text: tg).TargetGroups[0].TargetGroupArn
 
@@ -147,6 +149,7 @@ pipeline {
                                 --protocol TCP \
                                 --port 3000 \
                                 --default-actions Type=forward,TargetGroupArn=${tgArn}
+                                --region ${AWS_DEFAULT_REGION}
                             """
                 }
             }
@@ -162,6 +165,7 @@ pipeline {
                         --task-definition ${TASK_DEFINITION_NAME} \
                         --desired-count ${DESIRED_COUNT} \
                         --launch-type FARGATE \
+                        --region ${AWS_DEFAULT_REGION} \
                         --network-configuration "awsvpcConfiguration={subnets=[${SUBNETS}],securityGroups=[${SECURITYGROUPS}],assignPublicIp=ENABLED}" \
                         --load-balancers "targetGroupArn=${tgArn},loadBalancerName=Nodejs-lb,containerName=nodejs_container,containerPort=3000"
                     """
@@ -171,7 +175,8 @@ pipeline {
                         --scalable-dimension ecs:service:DesiredCount \
                         --resource-id service/${CLUSTER_NAME}/${SERVICE_NAME}\
                         --min-capacity ${MIN_CAPACITY} \
-                        --max-capacity ${MAX_CAPACITY}
+                        --max-capacity ${MAX_CAPACITY} \
+                        --region ${AWS_DEFAULT_REGION}
                     """                 
             }
         }
