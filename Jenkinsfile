@@ -18,6 +18,8 @@ pipeline {
         SECURITYGROUPS = "sg-0e2de29ec3748f13b"
         MIN_CAPACITY = "1"
         MAX_CAPACITY = "2"
+        lbArn = ""
+        tgArn = ""
           
     }
    
@@ -118,7 +120,7 @@ pipeline {
                     def lbOutput = sh(script: """
                         aws elbv2 create-load-balancer \
                             --name Nodejs-lb \
-                            --subnets subnet-0581fca58af676215 subnet-0fdb63e26e3f22cf1 subnet-09df83249a0362f2b subnet-0bd377746696148ae \
+                            --subnets ${SUBNETS} \
                             --security-groups ${SECURITYGROUPS} \
                             --type network \
                             --ip-address-type ipv4 \
@@ -127,12 +129,17 @@ pipeline {
                     """, returnStdout: true).trim()
 
                     // Extract ARN from output
-                    def lbArnMatcher = lbOutput =~ /"LoadBalancerArn": "(.*?)"/
-                    def lbArn = lbArnMatcher ? lbArnMatcher[0][1] : null
+                    lbArn = sh(script: "echo ${lbOutput} | jq -r '.LoadBalancers[0].LoadBalancerArn'", returnStdout: true).trim()
                     
                     // Print the ARN for verification
                     println "Load Balancer ARN: ${lbArn}"
-  
+                }
+            } 
+        }
+
+        stage('Create targetgroup') {
+            steps {
+                script {
                     // Creating a target group
                     def tgOutput = sh(script: """
                         aws elbv2 create-target-group \
@@ -148,12 +155,17 @@ pipeline {
                     """, returnStdout: true).trim()
 
                     // Extract ARN from output
-                    def tgArnMatcher = tgOutput =~ /"TargetGroupArn": "(.*?)"/
-                    def tgArn = tgArnMatcher ? tgArnMatcher[0][1] : null
+                    tgArn = sh(script: "echo ${tgOutput} | jq -r '.TargetGroups[0].TargetGroupArn'", returnStdout: true).trim()
 
                     // Print the ARN for verification
                     println "Target Group ARN: ${tgArn}"
+                }
+            }
+        }
 
+        stage('Create listener') {
+            steps {
+                script {
                     // Creating a listener
                     sh """
                         aws elbv2 create-listener --load-balancer-arn ${lbArn} --protocol TCP --port 3000 --default-actions Type=forward,TargetGroupArn=${tgArn} --region ${AWS_DEFAULT_REGION}
