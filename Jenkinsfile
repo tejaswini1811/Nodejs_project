@@ -118,7 +118,7 @@ pipeline {
                         def lb = sh(script: """
                             aws elbv2 create-load-balancer \
                                 --name Nodejs-lb \
-                                --subnets subnet-0581fca58af676215 subnet-0fdb63e26e3f22cf1 subnet-09df83249a0362f2b subnet-0bd377746696148ae \
+                                --subnets subnet-0581fca58af676215 subnet-0fdb63e26e3f22cf1 subnet-09df83249a0362f2b subnet-0bd377746696148ae" \
                                 --security-groups ${SECURITYGROUPS} \
                                 --type network \
                                 --ip-address-type ipv4 \
@@ -126,6 +126,12 @@ pipeline {
                                 --region ${AWS_DEFAULT_REGION}
                             """, returnStdout: true).trim()
                         def lbArn = readJSON(text: lb).LoadBalancers[0].LoadBalancerArn
+                }
+            } 
+        }
+        stage('Create Load Balancer') {
+            steps {
+                script {
 
                         // Creating a target group
                         def tg = sh(script: """
@@ -141,6 +147,12 @@ pipeline {
                                 --region ${AWS_DEFAULT_REGION}
                             """, returnStdout: true).trim()
                         def tgArn = readJSON(text: tg).TargetGroups[0].TargetGroupArn
+                }
+            }
+        }
+        stage('Create Load Balancer') {
+            steps {
+                script {
 
                         // Creating a listener
                         sh """
