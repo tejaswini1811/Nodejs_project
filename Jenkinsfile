@@ -115,7 +115,7 @@ pipeline {
             steps {
                 script {
                     // Creating an Application Load Balancer
-                    def lb = sh(script: """
+                    def lbOutput = sh(script: """
                         aws elbv2 create-load-balancer \
                             --name Nodejs-lb \
                             --subnets subnet-0581fca58af676215 subnet-0fdb63e26e3f22cf1 subnet-09df83249a0362f2b subnet-0bd377746696148ae \
@@ -124,8 +124,13 @@ pipeline {
                             --ip-address-type ipv4 \
                             --scheme internet-facing \
                             --region ${AWS_DEFAULT_REGION}
-                        """, returnStdout: true).trim()
-                    def lbArn = readJSON(text: lb).LoadBalancers[0].LoadBalancerArn
+                    """, returnStdout: true).trim()
+
+                    // Extract ARN from output
+                    def lbArn = lbOutput =~ /"LoadBalancerArn": "(.*?)"/
+                    
+                    // Print the ARN for verification
+                    println "Load Balancer ARN: ${lbArn}"
                 }
             } 
         }
@@ -133,7 +138,7 @@ pipeline {
             steps {
                 script {
                     // Creating a target group
-                    def tg = sh(script: """
+                    def tgOutput = sh(script: """
                         aws elbv2 create-target-group \
                             --name ecs-tg \
                             --protocol TCP \
@@ -144,8 +149,13 @@ pipeline {
                             --target-type instance \
                             --ip-address-type ipv4 \
                             --region ${AWS_DEFAULT_REGION}
-                        """, returnStdout: true).trim()
-                    def tgArn = readJSON(text: tg).TargetGroups[0].TargetGroupArn
+                    """, returnStdout: true).trim()
+
+                    // Extract ARN from output
+                    def tgArn = tgOutput =~ /"TargetGroupArn": "(.*?)"/
+
+                    // Print the ARN for verification
+                    println "Target Group ARN: ${tgArn}"
                 }
             }
         }
