@@ -12,9 +12,13 @@ pipeline {
         //Do not edit REPOSITORY_URI.
         REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
 	    registryCredential = "aws"
-        SUBNETS = "[subnet-0581fca58af676215,subnet-0fdb63e26e3f22cf1]"
-        SECURITYGROUPS = "[sg-0e2de29ec3748f13b]"
-    
+        SERVICE_NAME = "nodejs-svc"
+        VPC_ID ="vpc-0a729d0ec2b50a7ed"
+        SUBNETS = "subnet-0581fca58af676215,subnet-0fdb63e26e3f22cf1"
+        SECURITYGROUPS = "sg-0e2de29ec3748f13b"
+        MIN_CAPACITY = "1"
+        MAX_CAPACITY = "2"
+          
     }
    
     stages {
@@ -80,8 +84,8 @@ pipeline {
                                     "logDriver": "awslogs",
                                     "options": {
                                         "awslogs-create-group": "true",
-                                        "awslogs-group": "/ecs/nodejs_task",
-                                        "awslogs-region": "us-west-2",
+                                        "awslogs-group": "/ecs/${TASK_DEFINITION_NAME}",
+                                        "awslogs-region": "${AWS_DEFAULT_REGION}",
                                         "awslogs-stream-prefix": "ecs"
                                     },
                                     "secretOptions": []
@@ -89,8 +93,8 @@ pipeline {
                                 "systemControls": []
                             }
                         ],
-                        "taskRoleArn": "arn:aws:iam::348722393091:role/ecsTaskExecutionRole",
-                        "executionRoleArn": "arn:aws:iam::348722393091:role/ecsTaskExecutionRole",
+                        "taskRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/ecsTaskExecutionRole",
+                        "executionRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/ecsTaskExecutionRole",
                         "networkMode": "awsvpc",
                         "requiresCompatibilities": [
                             "FARGATE"
@@ -107,18 +111,78 @@ pipeline {
                 }
             }
         }
-        // Run the task
-        stage('Run Task in ECS') {
+        stage('Create Load Balancer') {
             steps {
-                sh "aws ecs run-task --cluster ${CLUSTER_NAME} --task-definition ${TASK_DEFINITION_NAME} --region ${AWS_DEFAULT_REGION} --launch-type FARGATE --count ${DESIRED_COUNT} --network-configuration awsvpcConfiguration={subnets=${SUBNETS},securityGroups=${SECURITYGROUPS},assignPublicIp=ENABLED} "
+                script {
+                        // Creating an Application Load Balancer
+                        def lb = sh(script: """
+                            aws elbv2 create-load-balancer \
+                                --name Nodejs-lb \
+                                --subnets ${SUBNETS} \
+                                --security-groups ${SECURITYGROUPS} \
+                                --type network \
+                                --ip-address-type ipv4 \
+                                --scheme internet-facing
+                            """, returnStdout: true).trim()
+                        def lbArn = readJSON(text: lb).LoadBalancers[0].LoadBalancerArn
+
+                        // Creating a target group
+                        def tg = sh(script: """
+                            aws elbv2 create-target-group \
+                                --name ecs-tg \
+                                --protocol TCP \
+                                --port 3000 \
+                                --vpc-id ${VPC_ID} \
+                                --health-check-protocol HTTP \
+                                --health-check-path / \
+                                --target-type instance \
+                                --ip-address-type ipv4
+                            """, returnStdout: true).trim()
+                        def tgArn = readJSON(text: tg).TargetGroups[0].TargetGroupArn
+
+                        // Creating a listener
+                        sh """
+                            aws elbv2 create-listener \
+                                --load-balancer-arn ${lbArn} \
+                                --protocol TCP \
+                                --port 3000 \
+                                --default-actions Type=forward,TargetGroupArn=${tgArn}
+                            """
+                }
+            }
+        }
+        stage('Deploy ECS Service') {
+            steps {
+                // Use the actual ARN or retrieve as done before
+                // Creating or updating ECS service
+                sh """
+                    aws ecs create-service \
+                        --cluster ${CLUSTER_NAME} \
+                        --service-name ${SERVICE_NAME} \
+                        --task-definition ${TASK_DEFINITION_NAME} \
+                        --desired-count ${DESIRED_COUNT} \
+                        --launch-type FARGATE \
+                        --network-configuration "awsvpcConfiguration={subnets=[${SUBNETS}],securityGroups=[${SECURITYGROUPS}],assignPublicIp=ENABLED}" \
+                        --load-balancers "targetGroupArn=${tgArn},loadBalancerName=Nodejs-lb,containerName=nodejs_container,containerPort=3000"
+                    """
+                sh """
+                    aws application-autoscaling register-scalable-target \
+                        --service-namespace ecs \
+                        --scalable-dimension ecs:service:DesiredCount \
+                        --resource-id service/${CLUSTER_NAME}/${SERVICE_NAME}\
+                        --min-capacity ${MIN_CAPACITY} \
+                        --max-capacity ${MAX_CAPACITY}
+                    """                 
             }
         }
     }
+
         // Clear local image registry. Note that all the data that was used to build the image is being cleared.
         // For different use cases, one may not want to clear all this data so it doesn't have to be pulled again for each build.
    post {
        always {
        sh 'docker system prune -a -f'
+       echo 'Deployment process completed.'
      }
    }
  }
