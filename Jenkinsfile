@@ -14,7 +14,7 @@ pipeline {
 	    registryCredential = "aws"
         SERVICE_NAME = "nodejs-svc"
         VPC_ID ="vpc-0a729d0ec2b50a7ed"
-        SUBNETS = "subnet-0581fca58af676215,subnet-0fdb63e26e3f22cf1"
+        SUBNETS = "subnet-0581fca58af676215,subnet-0fdb63e26e3f22cf1,subnet-0bd377746696148ae,subnet-09df83249a0362f2b"
         SECURITYGROUPS = "sg-0e2de29ec3748f13b"
         MIN_CAPACITY = "1"
         MAX_CAPACITY = "2"
@@ -118,7 +118,7 @@ pipeline {
                         def lb = sh(script: """
                             aws elbv2 create-load-balancer \
                                 --name Nodejs-lb \
-                                --subnets "subnet-0581fca58af676215","subnet-0fdb63e26e3f22cf1" \
+                                --subnets "subnet-0581fca58af676215" "subnet-0fdb63e26e3f22cf1" "subnet-09df83249a0362f2b" "subnet-0bd377746696148ae" \
                                 --security-groups ${SECURITYGROUPS} \
                                 --type network \
                                 --ip-address-type ipv4 \
