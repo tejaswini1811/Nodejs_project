@@ -120,16 +120,17 @@ pipeline {
                     def lbOutput = sh(script: """
                         aws elbv2 create-load-balancer \
                             --name Nodejs-lb \
-                            --subnets subnet-0581fca58af676215 subnet-0fdb63e26e3f22cf1 subnet-09df83249a0362f2b subnet-0bd377746696148ae \
+                            --subnets ${SUBNETS} \
                             --security-groups ${SECURITYGROUPS} \
                             --type network \
                             --ip-address-type ipv4 \
                             --scheme internet-facing \
-                            --region ${AWS_DEFAULT_REGION}
+                            --region ${AWS_DEFAULT_REGION} \
+                            --output json
                     """, returnStdout: true).trim()
 
-                    // Extract ARN from output
-                    lbArn = sh(script: "echo ${lbOutput} | jq -r '.LoadBalancers[0].LoadBalancerArn'", returnStdout: true).trim()
+                    // Use jq to extract the Load Balancer ARN from the JSON output
+                    lbArn = sh(script: "echo '${lbOutput}' | jq -r '.LoadBalancers[0].LoadBalancerArn'", returnStdout: true).trim()
                     
                     // Print the ARN for verification
                     println "Load Balancer ARN: ${lbArn}"
