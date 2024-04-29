@@ -188,7 +188,7 @@ pipeline {
                         --launch-type FARGATE \
                         --region ${AWS_DEFAULT_REGION} \
                         --network-configuration "awsvpcConfiguration={subnets=[${SUBNETS}],securityGroups=[${SECURITYGROUPS}],assignPublicIp=ENABLED}" \
-                        --load-balancers "targetGroupArn=${tgArn},loadBalancerName=Nodejs-lb,containerName=nodejs_container,containerPort=3000"
+                        --load-balancers "targetGroupArn=${tgArn},containerName=nodejs_container,containerPort=3000"
                     """
                 sh """
                     aws application-autoscaling register-scalable-target \
