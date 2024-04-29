@@ -150,7 +150,7 @@ pipeline {
                             --vpc-id ${VPC_ID} \
                             --health-check-protocol HTTP \
                             --health-check-path / \
-                            --target-type instance \
+                            --target-type ip \
                             --ip-address-type ipv4 \
                             --region ${AWS_DEFAULT_REGION} \
                             --output json
