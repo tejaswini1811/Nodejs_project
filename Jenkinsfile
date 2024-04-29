@@ -152,11 +152,12 @@ pipeline {
                             --health-check-path / \
                             --target-type instance \
                             --ip-address-type ipv4 \
-                            --region ${AWS_DEFAULT_REGION}
+                            --region ${AWS_DEFAULT_REGION} \
+                            --output json
                     """, returnStdout: true).trim()
 
-                    // Extract ARN from output
-                    tgArn = sh(script: "echo ${tgOutput} | jq -r '.TargetGroups[0].TargetGroupArn'", returnStdout: true).trim()
+                    // Use jq to extract the Target Group ARN from the JSON output
+                    tgArn = sh(script: "echo '${tgOutput}' | jq -r '.TargetGroups[0].TargetGroupArn'", returnStdout: true).trim()
 
                     // Print the ARN for verification
                     println "Target Group ARN: ${tgArn}"
